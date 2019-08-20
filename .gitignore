@@ -1,0 +1,9 @@
+results/
+__pycache__/
+examples/ 
+data/ 
+checkpoints/ 
+.DS_Store 
+tmp/ 
+tmp.*
+*.tmp
