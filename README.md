@@ -1,3 +1,26 @@
+
+
+
+
+
+pip install -r requirement.txt 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # generative-inpainting-pytorch
 A PyTorch reimplementation for the paper [Generative Image Inpainting with Contextual Attention](https://arxiv.org/abs/1801.07892) according to the author's [TensorFlow implementation](https://github.com/JiahuiYu/generative_inpainting).
 
