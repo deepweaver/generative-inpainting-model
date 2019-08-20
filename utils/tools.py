@@ -474,7 +474,7 @@ def deprocess(img):
 def get_config(config):
     with open(config, 'r') as stream:
         return yaml.load(stream, Loader=yaml.FullLoader)
-
+ 
 
 # Get model list for resume
 def get_model_list(dirname, key, iteration=0):
@@ -482,17 +482,23 @@ def get_model_list(dirname, key, iteration=0):
         return None
     gen_models = [os.path.join(dirname, f) for f in os.listdir(dirname) if
                   os.path.isfile(os.path.join(dirname, f)) and key in f and ".pt" in f]
+    # get all the filenames with prefix "gen" and extension ".pt" 
+    # normally there could be a lot of these files since it stores all the 
+    # models in the checkpoint folder checkpoints/imagenet/hole_benchmark/
     if gen_models is None:
         return None
-    gen_models.sort()
-    if iteration == 0:
+    gen_models.sort() # sort according to filename "gen_00430000.pt" 
+    if iteration == 0: # zero means the latest iteration
         last_model_name = gen_models[-1]
-    else:
+    else: # else choose a specific iteration of checkpoints 
         for model_name in gen_models:
+            # if say "gen_00002333.pt" in ["gen_00000001.pt", ... , "gen_00430000.pt"]
             if '{:0>8d}'.format(iteration) in model_name:
                 return model_name
         raise ValueError('Not found models with this iteration')
-    return last_model_name
+    return last_model_name # so, if it does not find the specified iteration
+    # first it raise the error, then
+    # it returns the latest one ( the one with the largest number in the middle of the file name ) 
 
 
 if __name__ == '__main__':

@@ -6,27 +6,32 @@ import os
 
 import torchvision.transforms as transforms
 
-
-class Dataset(data.Dataset):
+ 
+class Dataset(data.Dataset): 
     def __init__(self, data_path, image_shape, with_subfolder=False, random_crop=True, return_name=False):
         super(Dataset, self).__init__()
         if with_subfolder:
             self.samples = self._find_samples_in_subfolders(data_path)
         else:
-            self.samples = [x for x in listdir(data_path) if is_image_file(x)]
+            self.samples = [os.path.join(self.data_path,x) for x in listdir(data_path) if is_image_file(x)]
+            # this is just the image file names not images, filtering out all non image files 
+        # import sys 
+        # print(self.samples) 
+        # sys.exit(0)
         self.data_path = data_path
         self.image_shape = image_shape[:-1]
         self.random_crop = random_crop
         self.return_name = return_name
 
     def __getitem__(self, index):
-        path = os.path.join(self.data_path, self.samples[index])
-        img = default_loader(path)
+        path = self.samples[index]
+        img = default_loader(path) # PIL Images type
 
         if self.random_crop:
             imgw, imgh = img.size
             if imgh < self.image_shape[0] or imgw < self.image_shape[1]:
                 img = transforms.Resize(min(self.image_shape))(img)
+                # make it square
             img = transforms.RandomCrop(self.image_shape)(img)
         else:
             img = transforms.Resize(self.image_shape)(img)
@@ -69,6 +74,7 @@ class Dataset(data.Dataset):
                         # item = (path, class_to_idx[target])
                         # samples.append(item)
                         samples.append(path)
+                        # print(path)
         return samples
 
     def __len__(self):

@@ -23,18 +23,20 @@ parser.add_argument('--seed', type=int, help='manual seed')
 
 def main():
     args = parser.parse_args()
-    config = get_config(args.config)
+    config = get_config(args.config) # way to use config 
 
     # CUDA configuration
-    cuda = config['cuda']
+    cuda = config['cuda'] # specify cuda in config.yaml 
     device_ids = config['gpu_ids']
     if cuda:
         os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(i) for i in device_ids)
         device_ids = list(range(len(device_ids)))
         config['gpu_ids'] = device_ids
         cudnn.benchmark = True
- 
+  
     # Configure checkpoint path
+    # say you use imagenet pretrained model, since the dataset name is altered to be "dtd" 
+    # the trained checkpoint of this model will be stored in checkpoints/dtd/
     checkpoint_path = os.path.join('checkpoints',
                                    config['dataset_name'],
                                    config['mask_type'] + '_' + config['expname'])
@@ -90,6 +92,7 @@ def main():
             trainer_module = trainer
 
         # Get the resume iteration to restart training
+        # config['resume'] being the directory to checkpoints such as checkpoints/imagenet/hole_benchmark/
         start_iteration = trainer_module.resume(config['resume']) if config['resume'] else 1
 
         iterable_train_loader = iter(train_loader)

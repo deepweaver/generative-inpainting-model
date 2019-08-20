@@ -11,3 +11,4 @@ checkpoints/*
 tmp/ 
 tmp.*
 *.tmp
+data/datasets/* 

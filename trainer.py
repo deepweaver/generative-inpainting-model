@@ -129,17 +129,20 @@ class Trainer(nn.Module):
     def resume(self, checkpoint_dir, iteration=0, test=False):
         # Load generators
         last_model_name = get_model_list(checkpoint_dir, "gen", iteration=iteration)
-        self.netG.load_state_dict(torch.load(last_model_name))
+        mp_loc = 'cpu' if not self.config['cuda'] else None 
+        self.netG.load_state_dict(torch.load(last_model_name, map_location=mp_loc))
         iteration = int(last_model_name[-11:-3])
 
         if not test:
             # Load discriminators
             last_model_name = get_model_list(checkpoint_dir, "dis", iteration=iteration)
-            state_dict = torch.load(last_model_name)
+            # this function returns the path including filename of the latest checkpoint
+            state_dict = torch.load(last_model_name, map_location=mp_loc)
+
             self.localD.load_state_dict(state_dict['localD'])
             self.globalD.load_state_dict(state_dict['globalD'])
             # Load optimizers
-            state_dict = torch.load(os.path.join(checkpoint_dir, 'optimizer.pt'))
+            state_dict = torch.load(os.path.join(checkpoint_dir, 'optimizer.pt'), map_location=mp_loc)
             self.optimizer_d.load_state_dict(state_dict['dis'])
             self.optimizer_g.load_state_dict(state_dict['gen'])
 
