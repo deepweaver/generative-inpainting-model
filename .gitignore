@@ -1,8 +1,12 @@
-results/
+results/*
+!results/.gitkeep 
 __pycache__/
 examples/ 
-data/ 
-checkpoints/ 
+!examples/.gitkeep
+raven_data/*
+!raven_data/.gitkeep
+checkpoints/*
+!checkpoints/.gitkeep 
 .DS_Store 
 tmp/ 
 tmp.*

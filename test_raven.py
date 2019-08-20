@@ -6,7 +6,7 @@ import cv2
 import pickle 
 import tqdm 
 import datetime 
-path_to_data = "/Users/tiany/Desktop/ravens/data/data_a_ab_c_d_e_with_mask_570x900_py3.pkl"
+path_to_data = "raven_data/data_a_ab_c_d_e_with_mask_570x900_py3.pkl"
 with open(path_to_data, 'rb') as file: 
     raven_data = pickle.load(file) 
 
