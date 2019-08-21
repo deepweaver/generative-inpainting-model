@@ -6,7 +6,7 @@ wget -P ./data/datasets/ https://www.robots.ox.ac.uk/~vgg/data/dtd/download/dtd-
 tar -C data/datasets/ -xzvf data/datasets/dtd-r1.0.1.tar.gz
 # we have the dtd/ folder images in ./data/datasets/dtd/images/
 
-
+hahahh
 
 
 
