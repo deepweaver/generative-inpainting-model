@@ -10,7 +10,7 @@ echo 'export PATH="$HOME/miniconda3/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc 
 cd generative-inpainting-model/
 pip install -r requirements.txt
-
+sudo apt-get install tmux
 sh ./download.sh 
 
 echo "You have successfully completed installation and downloading" 
