@@ -20,8 +20,8 @@ mosaic_unit_size: 12
   
 # training parameters
 expname: benchmark
-cuda: False
-gpu_ids: [0, 1, 2]    # set the GPU ids to use, e.g. [0] or [1, 2]
+cuda: False  
+gpu_ids: [0]    # set the GPU ids to use, e.g. [0] or [1, 2]
 num_workers: 4
 lr: 0.0001
 beta1: 0.5
@@ -31,7 +31,7 @@ niter: 1000000
 print_iter: 100
 viz_iter: 1000
 viz_max_out: 16
-snapshot_save_iter: 5000
+snapshot_save_iter: 5000 # save checkpoints every 5000 times
 
 # loss weight
 coarse_l1_alpha: 1.2

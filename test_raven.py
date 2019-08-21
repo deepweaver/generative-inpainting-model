@@ -37,26 +37,39 @@ from utils.tools import get_config, random_bbox, mask_image, is_image_file, defa
 parser = ArgumentParser()
 parser.add_argument('--config', type=str, default='configs/config.yaml',
                     help="training configuration")
-parser.add_argument('--seed', type=int, help='manual seed')
-parser.add_argument('--image', type=str)
-parser.add_argument('--mask', type=str, default='')
-parser.add_argument('--output', type=str, default='output.png')
-parser.add_argument('--flow', type=str, default='')
+parser.add_argument('--seed', type=int, default=0, help='manual seed')
+# parser.add_argument('--image', type=str)
+# parser.add_argument('--mask', type=str, default='')
+# parser.add_argument('--output', type=str, default='output.png')
+# parser.add_argument('--flow', type=str, default='')
 parser.add_argument('--checkpoint_path', type=str, default='')
-parser.add_argument('--iter', type=int, default=0)
+parser.add_argument('--iter', type=int, default=0) # default means the latest iteration 
 
 args = parser.parse_args()
 config = get_config(args.config)
 # CUDA configuration
 cuda = config['cuda']
+if torch.cuda.device_count() > 0: 
+    cuda = True 
+
+if not args.checkpoint_path:
+    args.checkpoint_path = os.path.join('checkpoints',
+                                    config['dataset_name'],
+                                    config['mask_type'] + '_' + config['expname'])
+
+dataset_name = args.checkpoint_path.split("/")[1] 
+
 device_ids = config['gpu_ids']
 if cuda:
     os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(i) for i in device_ids)
     device_ids = list(range(len(device_ids)))
     config['gpu_ids'] = device_ids
     cudnn.benchmark = True
-
 print("Arguments: {}".format(args))
+
+
+
+
 
 # Set random seed
 if args.seed is None:
@@ -69,84 +82,27 @@ if cuda:
 # print("Configuration: {}".format(config))
 
 
-def main():
-    try:  # for unexpected error logging
-        with torch.no_grad():   # enter no grad context
 
-            if is_image_file(args.image):
-                if args.mask and is_image_file(args.mask):
-                    # Test a single masked image with a given mask
-                    # x = default_loader(args.image)
-                    x = np.stack((raven_data['a'][5][0,:,:],)*3, axis=-1)
-                    x = PIL.Image.fromarray(x) 
-                    
-                    # mask = default_loader(args.mask)
-                    mask = PIL.Image.fromarray(raven_data['a_mask'])
 
-                    x = transforms.Resize(config['image_shape'][:-1])(x)
-                    x = transforms.CenterCrop(config['image_shape'][:-1])(x)
-                    mask = transforms.Resize(config['image_shape'][:-1])(mask)
-                    mask = transforms.CenterCrop(config['image_shape'][:-1])(mask)
-                    x = transforms.ToTensor()(x)
-                    mask = transforms.ToTensor()(mask)[0].unsqueeze(dim=0)
-                    x = normalize(x)
-                    x = x * (1. - mask)
-                    x = x.unsqueeze(dim=0)
-                    mask = mask.unsqueeze(dim=0)
-                elif args.mask:
-                    raise TypeError("{} is not an image file.".format(args.mask))
-                else:
-                    # Test a single ground-truth image with a random mask
-                    ground_truth = default_loader(args.image)
-                    ground_truth = transforms.Resize(config['image_shape'][:-1])(ground_truth)
-                    ground_truth = transforms.CenterCrop(config['image_shape'][:-1])(ground_truth)
-                    ground_truth = transforms.ToTensor()(ground_truth)
-                    ground_truth = normalize(ground_truth)
-                    ground_truth = ground_truth.unsqueeze(dim=0)
-                    bboxes = random_bbox(config, batch_size=ground_truth.size(0))
-                    x, mask = mask_image(ground_truth, bboxes, config)
 
-                # Set checkpoint path
-                if not args.checkpoint_path:
-                    checkpoint_path = os.path.join('checkpoints',
-                                                   config['dataset_name'],
-                                                   config['mask_type'] + '_' + config['expname'])
-                else:
-                    checkpoint_path = args.checkpoint_path 
 
-                # Define the trainer
-                netG = Generator(config['netG'], cuda, device_ids)
-                # Resume weight
+# Define the trainer
+netG = Generator(config['netG'], cuda, device_ids)
+# Resume weight
 
-                last_model_name = get_model_list(checkpoint_path, "gen", iteration=args.iter)
-                if not cuda:
-                    netG.load_state_dict(torch.load(last_model_name, map_location='cpu'))
-                else: 
-                    netG.load_state_dict(torch.load(last_model_name))
-                model_iteration = int(last_model_name[-11:-3])
-                print("Resume from {} at iteration {}".format(checkpoint_path, model_iteration))
+last_model_name = get_model_list(args.checkpoint_path, "gen", iteration=args.iter)
+print("loading model from here --------------> {}".format(last_model_name))
+if not cuda:
+    netG.load_state_dict(torch.load(last_model_name, map_location='cpu'))
+else: 
+    netG.load_state_dict(torch.load(last_model_name))
+model_iteration = int(last_model_name[-11:-3])
+print("Resume from {} at iteration {}".format(args.checkpoint_path, model_iteration))
 
-                if cuda:
-                    netG = nn.parallel.DataParallel(netG, device_ids=device_ids)
-                    x = x.cuda()
-                    mask = mask.cuda()
-
-                # Inference
-                x1, x2, offset_flow = netG(x, mask)
-                inpainted_result = x2 * mask + x * (1. - mask)
-                print(inpainted_result.shape) 
-                print(type(np.uint8(inpainted_result.numpy())[0,0,0,0]))
-                vutils.save_image(inpainted_result, args.output, padding=0, normalize=True)
-                print("Saved the inpainted result to {}".format(args.output))
-                if args.flow:
-                    vutils.save_image(offset_flow, args.flow, padding=0, normalize=True)
-                    print("Saved offset flow to {}".format(args.flow))
-            else:
-                raise TypeError("{} is not an image file.".format)
-        # exit no grad context
-    except Exception as e:  # for unexpected error logging
-        print("Error: {}".format(e))
-        raise e
+if cuda:
+    netG = nn.parallel.DataParallel(netG, device_ids=device_ids)
+    x = x.cuda()
+    mask = mask.cuda()
 
 
 def get_generated_image(category, idx): # input 'a', '3'; mask is automatically inferred; 
@@ -154,6 +110,7 @@ def get_generated_image(category, idx): # input 'a', '3'; mask is automatically 
 
 def _get_generated_image(x, mask=None,): 
     # global generated_image_idx 
+    global netG 
     if mask is None: 
         mask = np.zeros(x.shape, dtype=np.uint8)
 
@@ -187,23 +144,9 @@ def _get_generated_image(x, mask=None,):
                                         config['mask_type'] + '_' + config['expname'])
     else:
         checkpoint_path = args.checkpoint_path 
+    
+    
 
-    # Define the trainer
-    netG = Generator(config['netG'], cuda, device_ids)
-    # Resume weight
-
-    last_model_name = get_model_list(checkpoint_path, "gen", iteration=args.iter)
-    if not cuda:
-        netG.load_state_dict(torch.load(last_model_name, map_location='cpu'))
-    else: 
-        netG.load_state_dict(torch.load(last_model_name))
-    model_iteration = int(last_model_name[-11:-3])
-    # print("Resume from {} at iteration {}".format(checkpoint_path, model_iteration))
-
-    if cuda:
-        netG = nn.parallel.DataParallel(netG, device_ids=device_ids)
-        x = x.cuda()
-        mask = mask.cuda()
 
     # Inference
     x1, x2, offset_flow, feature = netG(x, mask)
@@ -297,7 +240,8 @@ if __name__ == '__main__':
 
     print(correct_cnt, "------------", correct_cnt/len(correct_ans))
     print(correct_set_cnt)
-    with open("./results/answers.txt", 'a') as file: 
+    with open("./results/answers.txt", 'a') as file: # results folder is there, answers.txt will be created if needed 
+        file.write(str(datetime.datetime.now()) + " " + dataset_name + " " + str(model_iteration)+"\n")
         file.write(','.join(map(str, ans))+"\n")
         file.write(','.join(map(str, correct_set_cnt))+"\n") 
         file.write('\n') 
@@ -320,3 +264,81 @@ if __name__ == '__main__':
 
 
 
+# def main():
+#     try:  # for unexpected error logging
+#         with torch.no_grad():   # enter no grad context
+
+#             if is_image_file(args.image):
+#                 if args.mask and is_image_file(args.mask):
+#                     # Test a single masked image with a given mask
+#                     # x = default_loader(args.image)
+#                     x = np.stack((raven_data['a'][5][0,:,:],)*3, axis=-1)
+#                     x = PIL.Image.fromarray(x) 
+                    
+#                     # mask = default_loader(args.mask)
+#                     mask = PIL.Image.fromarray(raven_data['a_mask'])
+
+#                     x = transforms.Resize(config['image_shape'][:-1])(x)
+#                     x = transforms.CenterCrop(config['image_shape'][:-1])(x)
+#                     mask = transforms.Resize(config['image_shape'][:-1])(mask)
+#                     mask = transforms.CenterCrop(config['image_shape'][:-1])(mask)
+#                     x = transforms.ToTensor()(x)
+#                     mask = transforms.ToTensor()(mask)[0].unsqueeze(dim=0)
+#                     x = normalize(x)
+#                     x = x * (1. - mask)
+#                     x = x.unsqueeze(dim=0)
+#                     mask = mask.unsqueeze(dim=0)
+#                 elif args.mask:
+#                     raise TypeError("{} is not an image file.".format(args.mask))
+#                 else:
+#                     # Test a single ground-truth image with a random mask
+#                     ground_truth = default_loader(args.image)
+#                     ground_truth = transforms.Resize(config['image_shape'][:-1])(ground_truth)
+#                     ground_truth = transforms.CenterCrop(config['image_shape'][:-1])(ground_truth)
+#                     ground_truth = transforms.ToTensor()(ground_truth)
+#                     ground_truth = normalize(ground_truth)
+#                     ground_truth = ground_truth.unsqueeze(dim=0)
+#                     bboxes = random_bbox(config, batch_size=ground_truth.size(0))
+#                     x, mask = mask_image(ground_truth, bboxes, config)
+
+#                 # Set checkpoint path
+#                 if not args.checkpoint_path:
+#                     checkpoint_path = os.path.join('checkpoints',
+#                                                    config['dataset_name'],
+#                                                    config['mask_type'] + '_' + config['expname'])
+#                 else:
+#                     checkpoint_path = args.checkpoint_path 
+
+#                 # Define the trainer
+#                 netG = Generator(config['netG'], cuda, device_ids)
+#                 # Resume weight
+
+#                 last_model_name = get_model_list(checkpoint_path, "gen", iteration=args.iter)
+#                 if not cuda:
+#                     netG.load_state_dict(torch.load(last_model_name, map_location='cpu'))
+#                 else: 
+#                     netG.load_state_dict(torch.load(last_model_name))
+#                 model_iteration = int(last_model_name[-11:-3])
+#                 print("Resume from {} at iteration {}".format(checkpoint_path, model_iteration))
+
+#                 if cuda:
+#                     netG = nn.parallel.DataParallel(netG, device_ids=device_ids)
+#                     x = x.cuda()
+#                     mask = mask.cuda()
+
+#                 # Inference
+#                 x1, x2, offset_flow = netG(x, mask)
+#                 inpainted_result = x2 * mask + x * (1. - mask)
+#                 print(inpainted_result.shape) 
+#                 print(type(np.uint8(inpainted_result.numpy())[0,0,0,0]))
+#                 vutils.save_image(inpainted_result, args.output, padding=0, normalize=True)
+#                 print("Saved the inpainted result to {}".format(args.output))
+#                 if args.flow:
+#                     vutils.save_image(offset_flow, args.flow, padding=0, normalize=True)
+#                     print("Saved offset flow to {}".format(args.flow))
+#             else:
+#                 raise TypeError("{} is not an image file.".format)
+#         # exit no grad context
+#     except Exception as e:  # for unexpected error logging
+#         print("Error: {}".format(e))
+#         raise e

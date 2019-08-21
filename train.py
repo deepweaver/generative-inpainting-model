@@ -27,6 +27,9 @@ def main():
 
     # CUDA configuration
     cuda = config['cuda'] # specify cuda in config.yaml 
+    if torch.cuda.device_count() > 0: 
+        cuda = True 
+    
     device_ids = config['gpu_ids']
     if cuda:
         os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(i) for i in device_ids)
@@ -36,7 +39,7 @@ def main():
   
     # Configure checkpoint path
     # say you use imagenet pretrained model, since the dataset name is altered to be "dtd" 
-    # the trained checkpoint of this model will be stored in checkpoints/dtd/
+    # the trained checkpoint of this model will be stored in checkpoints/dtd/hole_benchmark
     checkpoint_path = os.path.join('checkpoints',
                                    config['dataset_name'],
                                    config['mask_type'] + '_' + config['expname'])
@@ -170,6 +173,11 @@ def main():
             # Save the model
             if iteration % config['snapshot_save_iter'] == 0:
                 trainer_module.save_model(checkpoint_path, iteration)
+                # checkpoint_path is checkpoints/dtd/hole_benchmark
+                # then you should use this check point to test raven score then store them in a file 
+                os.system("python test_raven.py --checkpoint_path {} >> tmp.out".format(checkpoint_path))
+                
+                # this could cause trouble if it's not python but python3 etc.
 
     except Exception as e:  # for unexpected error logging
         logger.error("{}".format(e))
