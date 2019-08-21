@@ -101,8 +101,7 @@ print("Resume from {} at iteration {}".format(args.checkpoint_path, model_iterat
 
 if cuda:
     netG = nn.parallel.DataParallel(netG, device_ids=device_ids)
-    x = x.cuda()
-    mask = mask.cuda()
+
 
 
 def get_generated_image(category, idx): # input 'a', '3'; mask is automatically inferred; 
@@ -144,8 +143,9 @@ def _get_generated_image(x, mask=None,):
                                         config['mask_type'] + '_' + config['expname'])
     else:
         checkpoint_path = args.checkpoint_path 
-    
-    
+    if cuda:
+        x = x.cuda()
+        mask = mask.cuda()
 
 
     # Inference
