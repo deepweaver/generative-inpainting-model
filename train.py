@@ -29,6 +29,7 @@ def main():
     cuda = config['cuda'] # specify cuda in config.yaml 
     if torch.cuda.device_count() > 0: 
         cuda = True 
+        config['cuda']
     
     device_ids = config['gpu_ids']
     if cuda:

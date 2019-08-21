@@ -58,13 +58,11 @@ class CoarseGenerator(nn.Module):
     def forward(self, x, mask):
         # For indicating the boundaries of images
         ones = torch.ones(x.size(0), 1, x.size(2), x.size(3))
-        x = torch.cat([x, ones, mask], dim=1)
         if self.use_cuda:
             ones = ones.cuda()
             mask = mask.cuda()
-            x = x.cuda()
         # 5 x 256 x 256
-        x = self.conv1(x)
+        x = self.conv1(torch.cat([x, ones, mask], dim=1))
         x = self.conv2_downsample(x)
         # cnum*2 x 128 x 128
         x = self.conv3(x)
