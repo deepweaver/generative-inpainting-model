@@ -151,6 +151,7 @@ def _get_generated_image(x, mask=None,):
     # Inference
     x1, x2, offset_flow, feature = netG(x, mask)
     inpainted_result = x2 * mask + x * (1. - mask)
+    inpainted_result = inpainted_result.cpu()
     np_inpainted_result = np.rollaxis(np.uint8(np.squeeze(inpainted_result.detach().numpy(), axis=0)), 0,3)
     assert np_inpainted_result.shape == (256, 256, 3) 
     # return 255-np_inpainted_result 
