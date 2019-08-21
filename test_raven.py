@@ -50,7 +50,7 @@ config = get_config(args.config)
 # CUDA configuration
 cuda = config['cuda']
 if torch.cuda.device_count() > 0: 
-    cuda = False # memory problem 
+    cuda = True # memory problem 
 
 if not args.checkpoint_path:
     args.checkpoint_path = os.path.join('checkpoints',
