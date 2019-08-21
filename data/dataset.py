@@ -15,9 +15,6 @@ class Dataset(data.Dataset):
         else:
             self.samples = [os.path.join(self.data_path,x) for x in listdir(data_path) if is_image_file(x)]
             # this is just the image file names not images, filtering out all non image files 
-        # import sys 
-        # print(self.samples) 
-        # sys.exit(0)
         self.data_path = data_path
         self.image_shape = image_shape[:-1]
         self.random_crop = random_crop
