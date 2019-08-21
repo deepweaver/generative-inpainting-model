@@ -35,7 +35,7 @@ class Trainer(nn.Module):
         self.train()
         losses = {}
 
-        x1, x2, offset_flow = self.netG(x, masks)
+        x1, x2, offset_flow, _ = self.netG(x, masks)
         local_patch_gt = local_patch(ground_truth, bboxes)
         x1_inpaint = x1 * masks + x * (1. - masks)
         x2_inpaint = x2 * masks + x * (1. - masks)
@@ -111,7 +111,7 @@ class Trainer(nn.Module):
 
     def inference(self, x, masks):
         self.eval()
-        x1, x2, offset_flow = self.netG(x, masks)
+        x1, x2, offset_flow, _ = self.netG(x, masks)
         # x1_inpaint = x1 * masks + x * (1. - masks)
         x2_inpaint = x2 * masks + x * (1. - masks)
 
