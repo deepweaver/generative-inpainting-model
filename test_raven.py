@@ -192,7 +192,7 @@ def get_answer(category, idx):
         lower_right_img = resized_img[height//2:, width//2:,:]  
     elif category in ['c', 'd', 'e']: 
         lower_right_img = resized_img[height//2:, width//2:,:]  
-    
+        
     answer_imgs = raven_data[category][idx][:,height//2:, width//2:] # shape == (6, _, _) 
     features = [] 
     features.append(get_feature(lower_right_img)) 
