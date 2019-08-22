@@ -89,7 +89,7 @@ def main():
         logger.info("\n{}".format(trainer.localD))
         logger.info("\n{}".format(trainer.globalD))
 
-        if len(device_ids) > 1:
+        if cuda:
             trainer = nn.parallel.DataParallel(trainer, device_ids=device_ids)
             trainer_module = trainer.module
         else:
