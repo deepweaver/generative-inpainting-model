@@ -66,6 +66,7 @@ if cuda:
     config['gpu_ids'] = device_ids
     cudnn.benchmark = True
 print("Arguments: {}".format(args))
+print("Use cuda: {}, use gpu_ids: {}".format(cuda, device_ids))
 
 
 
@@ -89,8 +90,8 @@ if cuda:
 # Define the trainer
 netG = Generator(config['netG'], cuda, device_ids)
 # Resume weight
-if cuda: 
-    netG.cuda()
+# if cuda: 
+#     netG.cuda()
 last_model_name = get_model_list(args.checkpoint_path, "gen", iteration=args.iter)
 print("loading model from here --------------> {}".format(last_model_name))
 if not cuda:
