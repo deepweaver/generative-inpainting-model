@@ -27,6 +27,10 @@ sudo apt-get install tmux
 
 echo "You have successfully completed installation and downloading" 
 
+export PATH="$HOME/miniconda3/bin:$PATH
+conda install pytorch torchvision cudatoolkit=9.2 -c pytorch
+conda install -c conda-forge tensorboardx 
+conda install pyyaml
 
 
 
