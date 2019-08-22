@@ -62,8 +62,8 @@ dataset_name = args.checkpoint_path.split("/")[1]
 device_ids = config['gpu_ids']
 if cuda:
     os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(i) for i in device_ids)
-    device_ids = list(range(len(device_ids)))
-    config['gpu_ids'] = [3]
+    device_ids = list(range(len(device_ids)))[0:1]
+    config['gpu_ids'] = device_ids
     cudnn.benchmark = True
 print("Arguments: {}".format(args))
 print("Use cuda: {}, use gpu_ids: {}".format(cuda, device_ids))
