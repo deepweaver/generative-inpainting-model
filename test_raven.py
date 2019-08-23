@@ -138,16 +138,11 @@ def _get_generated_image(x, mask=None,):
     mask = mask.unsqueeze(dim=0)
 
 
-    # Set checkpoint path
-    if not args.checkpoint_path:
-        checkpoint_path = os.path.join('checkpoints',
-                                        config['dataset_name'],
-                                        config['mask_type'] + '_' + config['expname'])
-    else:
-        checkpoint_path = args.checkpoint_path 
-    if cuda:
-        x = x.cuda()
-        mask = mask.cuda()
+
+    # if cuda:
+    #     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    #     x = x.cuda()
+    #     mask = mask.cuda()
 
 
     # Inference
