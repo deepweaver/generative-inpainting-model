@@ -1,3 +1,4 @@
+from __future__ import print_function, division 
 import os
 import random
 import time
@@ -176,6 +177,7 @@ def main():
                 trainer_module.save_model(checkpoint_path, iteration)
                 # checkpoint_path is checkpoints/dtd/hole_benchmark
                 # then you should use this check point to test raven score then store them in a file 
+            if iteration % config['snapshot_save_iter']//10 == 0:
                 os.system("python test_raven.py --checkpoint_path {} >> tmp.out".format(checkpoint_path))
                 
                 # this could cause trouble if it's not python but python3 etc.
