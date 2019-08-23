@@ -63,7 +63,8 @@ device_ids = config['gpu_ids']
 if cuda:
     os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(i) for i in device_ids)
     device_ids = list(range(len(device_ids)))
-    config['gpu_ids'] = device_ids
+    device_ids = [] 
+    # config['gpu_ids'] = device_ids
     cudnn.benchmark = True
 print("Arguments: {}".format(args))
 print("Use cuda: {}, use gpu_ids: {}".format(cuda, device_ids))
@@ -102,8 +103,9 @@ model_iteration = int(last_model_name[-11:-3])
 print("Resume from {} at iteration {}".format(args.checkpoint_path, model_iteration))
 
 if cuda:
-    netG = nn.parallel.DataParallel(netG, device_ids=device_ids)
-
+    # netG = nn.parallel.DataParallel(netG, device_ids=device_ids)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    netG = netG.to(device)
 
 
 def get_generated_image(category, idx): # input 'a', '3'; mask is automatically inferred; 
@@ -139,10 +141,10 @@ def _get_generated_image(x, mask=None,):
 
 
 
-    # if cuda:
-    #     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    #     x = x.cuda()
-    #     mask = mask.cuda()
+    if cuda:
+        # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        x = x.cuda()
+        mask = mask.cuda()
 
 
     # Inference
