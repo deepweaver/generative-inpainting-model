@@ -31,7 +31,7 @@ niter: 1000000
 print_iter: 100
 viz_iter: 1000
 viz_max_out: 16
-snapshot_save_iter: 5000 # save checkpoints every 5000 times
+snapshot_save_iter: 2500 # save checkpoints every 5000 times
 
 # loss weight
 coarse_l1_alpha: 1.2
