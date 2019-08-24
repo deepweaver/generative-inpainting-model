@@ -10,12 +10,13 @@ import torchvision.transforms as transforms
 class Dataset(data.Dataset): 
     def __init__(self, data_path, image_shape, with_subfolder=False, random_crop=True, return_name=False):
         super(Dataset, self).__init__()
+        self.data_path = data_path
         if with_subfolder:
-            self.samples = self._find_samples_in_subfolders(data_path)
+            self.samples = self._find_samples_in_subfolders(self.data_path)
         else:
             self.samples = [os.path.join(self.data_path,x) for x in listdir(data_path) if is_image_file(x)]
             # this is just the image file names not images, filtering out all non image files 
-        self.data_path = data_path
+        
         self.image_shape = image_shape[:-1]
         self.random_crop = random_crop
         self.return_name = return_name
