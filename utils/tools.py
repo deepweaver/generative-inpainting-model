@@ -460,7 +460,7 @@ def pt_make_color_wheel():
 
 
 def is_image_file(filename):
-    IMG_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.ppm', '.bmp', '.pgm', '.tif']
+    IMG_EXTENSIONS = ['.JPEG','.jpg', '.jpeg', '.png', '.ppm', '.bmp', '.pgm', '.tif']
     filename_lower = filename.lower()
     return any(filename_lower.endswith(extension) for extension in IMG_EXTENSIONS)
 
