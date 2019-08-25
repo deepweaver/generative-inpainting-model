@@ -51,7 +51,7 @@ config = get_config(args.config)
 cuda = config['cuda']
 if torch.cuda.device_count() > 0: 
     cuda = True # memory problem 
-
+    cuda = False 
 if not args.checkpoint_path:
     args.checkpoint_path = os.path.join('checkpoints',
                                     config['dataset_name'],
@@ -95,10 +95,10 @@ netG = Generator(config['netG'], cuda, device_ids)
 #     netG.cuda()
 last_model_name = get_model_list(args.checkpoint_path, "gen", iteration=args.iter)
 print("loading model from here --------------> {}".format(last_model_name))
-# if not cuda:
-netG.load_state_dict(torch.load(last_model_name, map_location='cpu'))
-# else: 
-#     netG.load_state_dict(torch.load(last_model_name))
+if not cuda:
+    netG.load_state_dict(torch.load(last_model_name, map_location='cpu'))
+else: 
+    netG.load_state_dict(torch.load(last_model_name))
 last_model_name = "/home/ubuntu/generative-inpainting-model/checkpoints/imagenet/hole_benchmark/gen_00165000.pt"
 model_iteration = int(last_model_name[-11:-3])
 print("Resume from {} at iteration {}".format(args.checkpoint_path, model_iteration))
