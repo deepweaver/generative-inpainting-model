@@ -17,7 +17,7 @@ from utils.tools import get_config, random_bbox, mask_image
 from utils.logger import get_logger
 
 parser = ArgumentParser()
-parser.add_argument('--config', type=str, default='configs/config.yaml',
+parser.add_argument('--config', type=str, default='configs/imagenet_config.yaml',
                     help="training configuration")
 parser.add_argument('--seed', type=int, help='manual seed')
 

@@ -132,7 +132,7 @@ class Trainer(nn.Module):
         mp_loc = 'cpu' if not self.config['cuda'] else None 
         self.netG.load_state_dict(torch.load(last_model_name, map_location=mp_loc))
         iteration = int(last_model_name[-11:-3])
-
+        print("last model name is {}".format(last_model_name)) 
         if not test:
             # Load discriminators
             last_model_name = get_model_list(checkpoint_dir, "dis", iteration=iteration)
