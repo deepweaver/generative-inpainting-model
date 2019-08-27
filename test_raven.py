@@ -97,11 +97,11 @@ netG = Generator(config['netG'], cuda, device_ids)
 # last_model_name = get_model_list(args.checkpoint_path, "gen", iteration=args.iter)
 last_model_name = args.which_model 
 print("loading model from here --------------> {}".format(last_model_name))
-if not cuda:
-    netG.load_state_dict(torch.load(last_model_name, map_location='cpu'))
-else: 
-    netG.load_state_dict(torch.load(last_model_name))
-# last_model_name = "/home/ubuntu/generative-inpainting-model/checkpoints/imagenet/hole_benchmark/gen_00252500.pt"
+# if not cuda:
+#     netG.load_state_dict(torch.load(last_model_name, map_location='cpu'))
+# else: 
+#     netG.load_state_dict(torch.load(last_model_name))
+
 model_iteration = int(last_model_name[-11:-3])
 print("Resume from {} at iteration {}".format(args.checkpoint_path, model_iteration))
 
