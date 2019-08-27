@@ -12,7 +12,8 @@ gen_models.sort()
 print(gen_models) 
 
 for path in gen_models: 
-    os.system("python test_raven.py --")
+    print("resuming from model {}".format(path)) 
+    os.system("python test_raven.py --which_model {}".format(path))
 
 
 
