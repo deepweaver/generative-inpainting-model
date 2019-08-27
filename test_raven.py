@@ -35,7 +35,7 @@ from utils.tools import get_config, random_bbox, mask_image, is_image_file, defa
 
 
 parser = ArgumentParser()
-parser.add_argument('--config', type=str, default='configs/config.yaml',
+parser.add_argument('--config', type=str, default='configs/imagenet_config.yaml',
                     help="training configuration")
 parser.add_argument('--seed', type=int, default=0, help='manual seed')
 # parser.add_argument('--image', type=str)
@@ -100,7 +100,7 @@ if not cuda:
     netG.load_state_dict(torch.load(last_model_name, map_location='cpu'))
 else: 
     netG.load_state_dict(torch.load(last_model_name))
-last_model_name = "/home/ubuntu/generative-inpainting-model/checkpoints/imagenet/hole_benchmark/gen_00252500.pt"
+# last_model_name = "/home/ubuntu/generative-inpainting-model/checkpoints/imagenet/hole_benchmark/gen_00252500.pt"
 model_iteration = int(last_model_name[-11:-3])
 print("Resume from {} at iteration {}".format(args.checkpoint_path, model_iteration))
 
