@@ -105,9 +105,9 @@ model_iteration = int(last_model_name[-11:-3])
 print("Resume from {} at iteration {}".format(args.checkpoint_path, model_iteration))
 
 if cuda:
-    # netG = nn.parallel.DataParallel(netG, device_ids=device_ids)
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    netG = netG.to(device)
+    netG = nn.parallel.DataParallel(netG, device_ids=device_ids)
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    # netG = netG.to(device)
 
 
 def get_generated_image(category, idx): # input 'a', '3'; mask is automatically inferred; 

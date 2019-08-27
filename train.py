@@ -99,7 +99,7 @@ def main():
         # Get the resume iteration to restart training
         # config['resume'] being the directory to checkpoints such as checkpoints/imagenet/hole_benchmark/
         start_iteration = trainer_module.resume(config['resume']) if config['resume'] else 1
-
+        print("start at iteration {}".format(start_iteration))
         iterable_train_loader = iter(train_loader)
 
         time_count = time.time()
