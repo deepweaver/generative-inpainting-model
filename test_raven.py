@@ -51,7 +51,8 @@ config = get_config(args.config)
 cuda = config['cuda']
 if torch.cuda.device_count() > 0: 
     cuda = True # memory problem 
-cuda = False 
+else:
+    cuda = False 
 if not args.checkpoint_path:
     args.checkpoint_path = os.path.join('checkpoints',
                                     config['dataset_name'],
@@ -63,8 +64,8 @@ device_ids = config['gpu_ids']
 if cuda:
     os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(i) for i in device_ids)
     device_ids = list(range(len(device_ids)))
-    device_ids = [] 
-    # config['gpu_ids'] = device_ids
+    # device_ids = [] 
+    config['gpu_ids'] = device_ids
     cudnn.benchmark = True
 print("Arguments: {}".format(args))
 print("Use cuda: {}, use gpu_ids: {}".format(cuda, device_ids))
@@ -193,6 +194,7 @@ def get_answer(category, idx):
     elif category in ['c', 'd', 'e']: 
         lower_right_img = resized_img[height//2:, width//2:,:]  
 
+    # answer_imgs = raven_data[category][idx][:,height//2:, width//2:] # shape == (6, _, _) 
     answer_imgs = raven_data[category][idx][:,height//2:, width//2:] # shape == (6, _, _) 
     features = [] 
     features.append(get_feature(lower_right_img)) 
