@@ -42,9 +42,9 @@ parser.add_argument('--seed', type=int, default=0, help='manual seed')
 # parser.add_argument('--mask', type=str, default='')
 # parser.add_argument('--output', type=str, default='output.png')
 # parser.add_argument('--flow', type=str, default='')
-parser.add_argument('--checkpoint_path', type=str, default='')
+parser.add_argument('--checkpoint_path', type=str, default='checkpoints/imagenet/hole_benchmark')
 parser.add_argument('--iter', type=int, default=0) # default means the latest iteration 
-
+parser.add_argument('--which_model', type=str, default='') 
 args = parser.parse_args()
 config = get_config(args.config)
 # CUDA configuration
@@ -105,9 +105,9 @@ model_iteration = int(last_model_name[-11:-3])
 print("Resume from {} at iteration {}".format(args.checkpoint_path, model_iteration))
 
 if cuda:
-    netG = nn.parallel.DataParallel(netG, device_ids=device_ids)
-    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    # netG = netG.to(device)
+    # netG = nn.parallel.DataParallel(netG, device_ids=device_ids)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    netG = netG.to(device)
 
 
 def get_generated_image(category, idx): # input 'a', '3'; mask is automatically inferred; 
