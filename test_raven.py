@@ -44,7 +44,7 @@ parser.add_argument('--seed', type=int, default=0, help='manual seed')
 # parser.add_argument('--flow', type=str, default='')
 parser.add_argument('--checkpoint_path', type=str, default='checkpoints/imagenet/hole_benchmark')
 parser.add_argument('--iter', type=int, default=0) # default means the latest iteration 
-parser.add_argument('--which_model', type=str, default='') 
+parser.add_argument('--which_model', type=str, default='checkpoints/imagenet/hole_benchmark/gen_00327500.pt') 
 args = parser.parse_args()
 config = get_config(args.config)
 # CUDA configuration
@@ -94,7 +94,8 @@ netG = Generator(config['netG'], cuda, device_ids)
 # Resume weight
 # if cuda: 
 #     netG.cuda()
-last_model_name = get_model_list(args.checkpoint_path, "gen", iteration=args.iter)
+# last_model_name = get_model_list(args.checkpoint_path, "gen", iteration=args.iter)
+last_model_name = args.which_model 
 print("loading model from here --------------> {}".format(last_model_name))
 if not cuda:
     netG.load_state_dict(torch.load(last_model_name, map_location='cpu'))

@@ -11,6 +11,8 @@ gen_models = [os.path.join(dirname, f) for f in os.listdir(dirname) if os.path.i
 gen_models.sort() 
 print(gen_models) 
 
+for path in gen_models: 
+    os.system("python test_raven.py --")
 
 
 
