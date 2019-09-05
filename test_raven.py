@@ -99,11 +99,16 @@ last_model_name = get_model_list(args.checkpoint_path, "gen", iteration=args.ite
 last_model_name = args.which_model 
 # last_model_name = args.which_model 
 # print("loading model from here --------------> {}".format(last_model_name))
-if not cuda:
-    netG.load_state_dict(torch.load(last_model_name, map_location='cpu'))
-else: 
-    netG.load_state_dict(torch.load(last_model_name))
 
+# if not cuda:
+#     netG.load_state_dict(torch.load(last_model_name, map_location='cpu'))
+# else: 
+#     netG.load_state_dict(torch.load(last_model_name))
+def init_weights(m):
+    if type(m) == nn.Linear:
+        torch.nn.init.xavier_uniform(m.weight)
+        m.bias.data.fill_(0.01)
+netG.apply(init_weights)
 # model_iteration = int(last_model_name[-11:-3])
 print("Resume from {}".format(args.checkpoint_path))
 
@@ -261,9 +266,40 @@ if __name__ == '__main__':
             mask = masks[i] 
             generated, _ = _get_generated_image(images[i],masks[i])
             cv2.imwrite(image_root+image_inpainted[i], generated) 
-    # main()
+    
 
+    def main2(): 
+        image_root = "/Users/tiany/Desktop/raven_set_e_like/sub/" 
+        image_filenames = ['b.png', 'c.png', 'd.png', 'n.png', 'r.png', 's.png', 't.png', 'x.png'] 
+        image_masks = ['b_mask.png', 'c_mask.png', 'd_mask.png', 'n_mask.png', 'r_mask.png', 's_mask.png', 't_mask.png', 'x_mask.png'] 
+        image_inpainted = ['b_out2.png', 'c_out2.png', 'd_out2.png', 'n_out2.png', 'r_out2.png', 's_out2.png', 't_out2.png', 'x_out.png'] 
 
+        images = []
+        for name in image_filenames: 
+            images.append(cv2.imread(image_root + name)) 
+
+        masks = [] 
+        with open(image_root+"configs.txt", 'r') as file: 
+            dat = file.readlines() 
+        for i, line in enumerate(dat): 
+            print(i)
+            if len(line) < 5: 
+                break 
+            print(line.strip("\n").split(" "))
+            x1, y1, x2, y2 = map(int,line.strip("\n").split(" ")[1:]) 
+            mask = np.zeros(images[i].shape, dtype=np.uint8) 
+            mask[y1:y2,x1:x2,:] = 255 
+            masks.append(mask) 
+            cv2.imwrite(image_root + image_masks[i], mask)
+        # for name in image_masks: 
+        #     masks.append(255-cv2.imread(image_root + name)) 
+        
+        inpainted = [] 
+        for i in range(len(images)):
+            mask = masks[i] 
+            generated, _ = _get_generated_image(images[i],masks[i])
+            cv2.imwrite(image_root+image_inpainted[i], generated) 
+    # main2() 
 
 
 
