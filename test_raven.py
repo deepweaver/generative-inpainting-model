@@ -42,9 +42,9 @@ parser.add_argument('--seed', type=int, default=0, help='manual seed')
 # parser.add_argument('--mask', type=str, default='')
 # parser.add_argument('--output', type=str, default='output.png')
 # parser.add_argument('--flow', type=str, default='')
-parser.add_argument('--checkpoint_path', type=str, default='checkpoints/imagenet/hole_benchmark')
+parser.add_argument('--checkpoint_path', type=str, default='checkpoints2/imagenet/hole_benchmark')
 parser.add_argument('--iter', type=int, default=0) # default means the latest iteration 
-parser.add_argument('--which_model', type=str, default='checkpoints/imagenet/hole_benchmark/gen_00327500.pt') 
+parser.add_argument('--which_model', type=str, default='checkpoints2/imagenet/hole_benchmark/gen_00080000.pt') 
 args = parser.parse_args()
 config = get_config(args.config)
 # CUDA configuration
@@ -57,6 +57,7 @@ if not args.checkpoint_path:
     args.checkpoint_path = os.path.join('checkpoints',
                                     config['dataset_name'],
                                     config['mask_type'] + '_' + config['expname'])
+print("args.checkpoint_path = {}".format(args.checkpoint_path)) 
 
 dataset_name = args.checkpoint_path.split("/")[1] 
 
@@ -67,7 +68,7 @@ if cuda:
     # device_ids = [] 
     config['gpu_ids'] = device_ids
     cudnn.benchmark = True
-print("Arguments: {}".format(args))
+# print("Arguments: {}".format(args))
 print("Use cuda: {}, use gpu_ids: {}".format(cuda, device_ids))
 
 
@@ -94,16 +95,17 @@ netG = Generator(config['netG'], cuda, device_ids)
 # Resume weight
 # if cuda: 
 #     netG.cuda()
-# last_model_name = get_model_list(args.checkpoint_path, "gen", iteration=args.iter)
+last_model_name = get_model_list(args.checkpoint_path, "gen", iteration=args.iter)
 last_model_name = args.which_model 
-print("loading model from here --------------> {}".format(last_model_name))
-# if not cuda:
-#     netG.load_state_dict(torch.load(last_model_name, map_location='cpu'))
-# else: 
-#     netG.load_state_dict(torch.load(last_model_name))
+# last_model_name = args.which_model 
+# print("loading model from here --------------> {}".format(last_model_name))
+if not cuda:
+    netG.load_state_dict(torch.load(last_model_name, map_location='cpu'))
+else: 
+    netG.load_state_dict(torch.load(last_model_name))
 
-model_iteration = int(last_model_name[-11:-3])
-print("Resume from {} at iteration {}".format(args.checkpoint_path, model_iteration))
+# model_iteration = int(last_model_name[-11:-3])
+print("Resume from {}".format(args.checkpoint_path))
 
 if cuda:
     # netG = nn.parallel.DataParallel(netG, device_ids=device_ids)
@@ -227,31 +229,78 @@ if __name__ == '__main__':
     # plt.imshow(img) 
     # plt.show()
     # print(get_feature(raven_data['a'][0][0,:,:]).shape)
-    from answers import Answers
-    # sets = ['a', 'ab', 'b', 'c', 'd', 'e']
-    sets = ['a', 'ab', 'b', 'c', 'd', 'e']
-    ans = []
-    for j, s in enumerate(sets): 
-        print("Dealing with {} set".format(s))
-        for i in tqdm.tqdm(range(12)):
-            ans.append(get_answer(s,i))
-    # print(get_answer('a', 0))
-    correct_ans = Answers().a + Answers().ab + Answers().b + Answers().c + Answers().d + Answers().e 
+     
+    def main(): 
+        image_root = "/Users/tiany/GitHub/generative-inpainting-model/paper_pics/gestalt_images/" 
+        image_filenames = ['brush.png', 'fish_fin.png', 'rocket.png', 'spin.png', 'yoyo.png'] 
+        image_masks = ['brush2_mask.png', 'fish_fin2_mask.png', 'rocket2_mask.png', 'spin2_mask.png', 'yoyo2_mask.png'] 
+        image_inpainted = ['brush2_out.png', 'fish_fin2_out.png', 'rocket2_out.png', 'spin2_out.png', 'yoyo2_out.png'] 
 
-    comparison = np.array(correct_ans) == np.array(ans) # boolean comparison 
-    correct_cnt = np.sum(comparison) 
+        images = []
+        for name in image_filenames: 
+            images.append(cv2.imread(image_root + name)) 
 
-    correct_set_cnt = [] 
-    for i in range(0, 12*len(sets), 12): 
-        correct_set_cnt.append(np.sum(comparison[i:i+12]))
+        masks = [] 
+        with open(image_root+"configs.txt", 'r') as file: 
+            dat = file.readlines() 
+        for i, line in enumerate(dat): 
+            print(i)
+            if len(line) < 5: 
+                break 
+            print(line.strip("\n").split(" "))
+            x1, y1, x2, y2 = map(int,line.strip("\n").split(" ")[1:-1]) 
+            mask = np.zeros(images[i].shape, dtype=np.uint8) 
+            mask[y1:y2,x1:x2,:] = 255 
+            masks.append(mask) 
+            cv2.imwrite(image_root + image_masks[i], mask)
+        # for name in image_masks: 
+        #     masks.append(255-cv2.imread(image_root + name)) 
+        
+        inpainted = [] 
+        for i in range(len(images)):
+            mask = masks[i] 
+            generated, _ = _get_generated_image(images[i],masks[i])
+            cv2.imwrite(image_root+image_inpainted[i], generated) 
+    # main()
 
-    print(correct_cnt, "------------", correct_cnt/len(correct_ans))
-    print(correct_set_cnt)
-    with open("./results/answers.txt", 'a') as file: # results folder is there, answers.txt will be created if needed 
-        file.write(str(datetime.datetime.now()) + " " + dataset_name + " " + str(model_iteration)+"\n")
-        file.write(','.join(map(str, ans))+"\n")
-        file.write(','.join(map(str, correct_set_cnt))+"\n") 
-        file.write('\n') 
+
+
+
+
+
+
+
+
+    def main_bak():
+        from answers import Answers
+        # sets = ['a', 'ab', 'b', 'c', 'd', 'e']
+        sets = ['a', 'ab', 'b', 'c', 'd', 'e']
+        ans = []
+        for j, s in enumerate(sets): 
+            print("Dealing with {} set".format(s))
+            for i in tqdm.tqdm(range(12)):
+                ans.append(get_answer(s,i))
+        # print(get_answer('a', 0))
+        correct_ans = Answers().a + Answers().ab + Answers().b + Answers().c + Answers().d + Answers().e 
+
+        comparison = np.array(correct_ans) == np.array(ans) # boolean comparison 
+        correct_cnt = np.sum(comparison) 
+
+        correct_set_cnt = [] 
+        for i in range(0, 12*len(sets), 12): 
+            correct_set_cnt.append(np.sum(comparison[i:i+12]))
+
+        print(correct_cnt, "------------", correct_cnt/len(correct_ans))
+        print(correct_set_cnt)
+        print(ans)
+        with open("./results/answers.txt", 'a') as file: # results folder is there, answers.txt will be created if needed 
+            file.write(str(datetime.datetime.now()) + " " +"\n")
+            file.write(','.join(map(str, ans))+"\n")
+            file.write(','.join(map(str, correct_set_cnt))+"\n") 
+            file.write('\n') 
+
+    main_bak() 
+
 # random seed 698
 # 5.27
 # 4566

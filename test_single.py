@@ -105,7 +105,7 @@ def main():
                     mask = mask.cuda()
 
                 # Inference
-                x1, x2, offset_flow = netG(x, mask)
+                x1, x2, offset_flow, _ = netG(x, mask)
                 inpainted_result = x2 * mask + x * (1. - mask)
 
                 vutils.save_image(inpainted_result, args.output, padding=0, normalize=True)

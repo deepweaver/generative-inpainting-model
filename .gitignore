@@ -6,6 +6,8 @@ examples/
 raven_data/*
 !raven_data/.gitkeep
 checkpoints/*
+checkpoints2/*
+checkpoint*
 !checkpoints/.gitkeep 
 .DS_Store 
 tmp/ 
