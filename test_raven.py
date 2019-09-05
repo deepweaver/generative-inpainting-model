@@ -330,7 +330,7 @@ if __name__ == '__main__':
         print(correct_set_cnt)
         print(ans)
         with open("./results/answers.txt", 'a') as file: # results folder is there, answers.txt will be created if needed 
-            file.write(str(datetime.datetime.now()) + " " + args.seed +"\n")
+            file.write(str(datetime.datetime.now()) + " " + str(args.seed) +"\n")
             file.write(','.join(map(str, ans))+"\n")
             file.write(','.join(map(str, correct_set_cnt))+"\n") 
             file.write('\n') 
